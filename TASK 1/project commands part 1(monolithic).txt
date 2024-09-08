@@ -1,0 +1,121 @@
+
+Step1 : Install Apache, MySQL, and PHP- Update Packages:
+
+sudo apt update
+sudo apt upgrade -y
+
+
+- Install Apache:
+
+sudo apt install apache2 -y
+
+
+- Install MySQL:
+
+sudo apt install mysql-server -y
+
+
+- Secure MySQL Installation:
+
+sudo mysql_secure_installation
+
+
+- Install PHP and Required Extensions:
+
+sudo apt install php libapache2-mod-php php-mysql -y
+
+
+
+Step 2: Configure MySQL- Log in to MySQL:
+
+sudo mysql -u root -p
+
+
+
+- Create a Database and User:
+
+CREATE DATABASE wordpress;
+CREATE USER 'wpuser'@'localhost' IDENTIFIED BY 'Prasanna@317';
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wpuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+
+Step 3: Install WordPress- Download WordPress:
+
+cd /tmp
+wget https://wordpress.org/latest.tar.gz
+tar -xvzf latest.tar.gz
+
+
+
+- Configure WordPress:
+
+sudo cp /tmp/wordpress/wp-config-sample.php /tmp/wordpress/wp-config.php
+sudo nano /tmp/wordpress/wp-config.php
+
+
+Update the database details in wp-config.php:
+
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'wpuser');
+define('DB_PASSWORD', 'Prasanna@317555');
+define('DB_HOST', 'localhost');
+
+
+- Move WordPress Files to Apache Root:
+
+sudo cp -r /tmp/wordpress/* /var/www/html/
+sudo chown -R www-data:www-data /var/www/html/
+sudo chmod -R 755 /var/www/html/
+
+
+Step 4: Complete WordPress Installation- Restart Apache:
+
+sudo systemctl restart apache2
+
+NOW CHECK THE IP ADDRESSS
+
+
+
+
+if (APACHE IT WORKS  ) try this after that 
+
+Step 1: Verify WordPress Files- Check if WordPress files are in the correct directory:
+
+ls /var/www/html/
+
+You should see WordPress files like index.php, wp-config.php, etc.
+Step 2: Remove Default Apache Page- Remove the default Apache index.html:
+
+sudo rm /var/www/html/index.html
+
+Step 1: Restart Apache- Restart Apache:
+
+sudo systemctl restart apache2
+sudo apt install php libapache2-mod-php php-mysql -y
+
+- Enable PHP Module:
+
+sudo a2enmod php7.4
+sudo systemctl restart apache2
+
+Step 2: Check File Permissions- Set Correct Permissions:
+
+sudo chown -R www-data:www-data /var/www/html/
+sudo chmod -R 755 /var/www/html/
+
+Step 3: Verify Apache Configuration- Check Apache Configuration:
+
+sudo nano /etc/apache2/sites-available/000-default.conf
+
+Ensure the DocumentRoot is set to /var/www/html.
+- Restart Apache:
+
+sudo systemctl restart apache2
+
+Step 4: Remove Default Apache Page- Remove the default Apache index.html:
+
+sudo rm /var/www/html/index.html
+
+

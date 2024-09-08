@@ -1,0 +1,156 @@
+To set up your WordPress and MySQL microservices on two EC2 instances, we need to:
+
+1. **Configure the security groups** for both the WordPress and MySQL instances.
+2. **Deploy WordPress** and configure it to connect to the MySQL database.
+3. **Create a WordPress homepage** that users can log in to.
+
+### Security Groups Configuration
+
+1. **WordPress EC2 Instance (3.90.208.9)**
+
+   - **Inbound Rules:**
+     - HTTP (port 80) from `0.0.0.0/0` (for public web access)
+     - HTTPS (port 443) from `0.0.0.0/0` (for secure web access if using SSL)
+     - SSH (port 22) from `49.205.209.240/32` (your IP for secure SSH access)
+     - MySQL/Aurora (port 3306) from `172.31.31.200/32` (allow the WordPress instance to communicate with the MySQL instance)
+     
+   - **Outbound Rules:**
+     - All traffic allowed by default (for internet access, updates, etc.)
+
+2. **MySQL EC2 Instance (54.82.112.9)**
+
+   - **Inbound Rules:**
+     - MySQL/Aurora (port 3306) from `172.31.22.186/32` (allow the WordPress instance to communicate with the database)
+     - SSH (port 22) from `49.205.209.240/32` (your IP for secure SSH access)
+     
+   - **Outbound Rules:**
+     - All traffic allowed by default (for package updates, etc.)
+
+### WordPress Setup
+
+1. **Launch the EC2 Instances:**
+   - Launch two EC2 instances using the `t2.micro` instance type and Ubuntu AMI (`ubuntu-*`).
+   - Assign the security groups you just configured to each instance.
+
+2. **Set up the MySQL database:**
+   - SSH into your MySQL instance using your private key:
+     
+     ssh -i your-key.pem ubuntu@54.82.112.9
+     
+   - Install MySQL:
+     
+     sudo apt update
+     sudo apt install mysql-server -y
+     
+   - Log into MySQL as root:
+     
+     sudo mysql -u root -p
+     
+   - Create the WordPress database and user:
+     
+     CREATE DATABASE wordpress;
+     CREATE USER 'wp_user'@'%' IDENTIFIED BY 'Prasanna@317';
+     GRANT ALL PRIVILEGES ON wordpress.* TO 'wp_user'@'%';
+     FLUSH PRIVILEGES;
+     EXIT;
+    
+   - Configure MySQL to allow connections from the WordPress instance. Edit the MySQL config file:
+  
+     sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+     
+   - Change the bind address to:
+  
+     bind-address = 0.0.0.0
+   
+   - Restart MySQL:
+     
+     sudo systemctl restart mysql
+    
+
+3. **Set up WordPress:**
+   - SSH into your WordPress instance using your private key:
+    
+     ssh -i your-key.pem ubuntu@3.90.208.9
+     
+   - Install Apache, PHP, and necessary PHP extensions:
+    
+     sudo apt update
+     sudo apt install apache2 php php-mysql -y
+    
+   - Download WordPress:
+     
+     wget https://wordpress.org/latest.tar.gz
+     tar -xvzf latest.tar.gz
+     sudo mv wordpress/* /var/www/html/
+    
+   - Configure WordPress to connect to the MySQL database. Edit the WordPress config file:
+     
+     sudo nano /var/www/html/wp-config.php
+     
+     Set the database details:
+     php
+     define('DB_NAME', 'wordpress');
+     define('DB_USER', 'wp_user');
+     define('DB_PASSWORD', 'Prasanna@317');
+     define('DB_HOST', '172.31.31.200');
+     
+   - Set the proper permissions:
+     
+     sudo chown -R www-data:www-data /var/www/html/
+     sudo chmod -R 755 /var/www/html/
+     
+   - Restart Apache:
+     
+     sudo systemctl restart apache2
+   
+
+4. **Create a Welcome Page:**
+   - Access your WordPress site by navigating to `http://3.90.208.9` in a browser.
+
+
+
+if apache comes then,
+Verify WordPress Installation: Ensure that WordPress files are in the /var/www/html/ directory.
+
+SSH into your WordPress instance:
+
+
+ssh -i your-key.pem ubuntu@3.90.208.9
+Check the contents of the /var/www/html/ directory:
+
+
+ls /var/www/html/
+You should see WordPress files such as index.php, wp-config.php, wp-admin, wp-content, etc.
+
+If you see the default index.html file from Apache, it’s causing the default page to show. You should remove it:
+bash
+
+sudo rm /var/www/html/index.html
+Move WordPress Files: If you haven't already, download and extract the WordPress package:
+
+
+
+wget https://wordpress.org/latest.tar.gz
+tar -xvzf latest.tar.gz
+sudo mv wordpress/* /var/www/html/
+Set File Permissions: Set the correct permissions for the WordPress files:
+
+
+sudo chown -R www-data:www-data /var/www/html/
+sudo chmod -R 755 /var/www/html/
+Configure WordPress Database Connection: Make sure the wp-config.php file is properly configured with the database details. If you haven’t done this yet, you can create the wp-config.php file by copying the sample configuration file:
+
+
+sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+sudo nano /var/www/html/wp-config.php
+Update the database connection details:
+
+
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'wp_user');
+define('DB_PASSWORD', 'Prasanna@317');
+define('DB_HOST', '172.31.31.200');  // MySQL instance private IP
+Restart Apache: After making all these changes, restart Apache:
+
+
+sudo systemctl restart apache2
